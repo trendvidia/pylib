@@ -74,3 +74,23 @@ func TestRunConcurrent(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+// TestUnpack: a second unpack of the same content reuses the first
+// directory, and different content gets its own.
+func TestUnpack(t *testing.T) {
+	dir := t.TempDir()
+	a, err := Unpack(dir, "std", stdlib)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(a + "/os.py"); err != nil {
+		t.Errorf("os.py not unpacked: %v", err)
+	}
+	b, err := Unpack(dir, "std", stdlib)
+	if err != nil || b != a {
+		t.Errorf("second Unpack = %q, %v, want %q", b, err, a)
+	}
+	if _, err := Unpack(dir, "std", []byte("not gzip")); err == nil {
+		t.Error("Unpack of a non-gzip payload succeeded")
+	}
+}

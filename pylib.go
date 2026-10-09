@@ -101,7 +101,7 @@ func Start(cacheDir string, paths ...string) error {
 		return startErr
 	}
 	started = true
-	lib, err := unpack(cacheDir)
+	lib, err := Unpack(cacheDir, "cpython-"+Version, stdlib)
 	if err != nil {
 		startErr = err
 		return err
