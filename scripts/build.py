@@ -17,6 +17,7 @@ Needs: gh, zstd, and LLVM >= the bitcode's (LLVM env var, default
 Homebrew's /opt/homebrew/opt/llvm/bin).
 """
 import concurrent.futures as cf
+import gzip
 import json
 import os
 import shutil
@@ -107,7 +108,11 @@ def build(triple):
 
     shutil.copytree(os.path.join(py, info["python_paths"]["include"]), os.path.join(out, "include"))
     stdlib = os.path.join(py, info["python_paths"]["stdlib"])
-    with tarfile.open(os.path.join(out, "stdlib.tar.gz"), "w:gz", compresslevel=9) as t:
+    # gzip's header carries a time and a name unless told not to; both are
+    # zeroed so a rebuild of the same release is byte for byte the same.
+    gz = gzip.GzipFile(os.path.join(out, "stdlib.tar.gz"), "wb", compresslevel=9, mtime=0)
+    gz.name = ""
+    with tarfile.open(fileobj=gz, mode="w") as t:
         for d, dirs, files in os.walk(stdlib):
             dirs[:] = sorted(x for x in dirs if x not in STDLIB_SKIP and not x.startswith("config-"))
             for f in sorted(files):
@@ -116,6 +121,7 @@ def build(triple):
                 ti.mtime, ti.uid, ti.gid, ti.uname, ti.gname = 0, 0, 0, "", ""
                 with open(p, "rb") as fh:
                     t.addfile(ti, fh)
+    gz.close()
     shutil.copytree(os.path.join(py, "licenses"), os.path.join(out, "licenses"))
 
     goos, goarch = plat.split("_")
