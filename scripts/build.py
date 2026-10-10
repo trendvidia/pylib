@@ -103,6 +103,12 @@ def build(triple):
             flags.append("${SRCDIR}/deps/%s/%s" % (plat, base))
         else:
             flags.append("-l" + l["name"])
+    if plat.startswith("linux_"):
+        # GNU ld reads each archive once, left to right, and PYTHON.json's
+        # order puts libncursesw before libedit and libcrypto before libssl,
+        # which need them: a group is rescanned until nothing more
+        # resolves. lld and Apple's ld search every archive anyway.
+        flags = ["-Wl,--start-group"] + flags + ["-Wl,--end-group"]
     for a in os.listdir(out):
         run(f"{LLVM}/llvm-strip", "--strip-debug", os.path.join(out, a))
 
