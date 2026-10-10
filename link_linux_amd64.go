@@ -4,7 +4,7 @@ package pylib
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/deps/linux_amd64/include
-#cgo LDFLAGS: ${SRCDIR}/deps/linux_amd64/libpython.a ${SRCDIR}/deps/linux_amd64/libbz2.a -ldl ${SRCDIR}/deps/linux_amd64/libffi.a ${SRCDIR}/deps/linux_amd64/libncursesw.a ${SRCDIR}/deps/linux_amd64/libpanelw.a -lm ${SRCDIR}/deps/linux_amd64/libmpdec.a ${SRCDIR}/deps/linux_amd64/libcrypto.a ${SRCDIR}/deps/linux_amd64/liblzma.a -lpthread -lrt ${SRCDIR}/deps/linux_amd64/libsqlite3.a ${SRCDIR}/deps/linux_amd64/libssl.a ${SRCDIR}/deps/linux_amd64/libuuid.a ${SRCDIR}/deps/linux_amd64/libzstd.a ${SRCDIR}/deps/linux_amd64/libz.a ${SRCDIR}/deps/linux_amd64/libexpat.a ${SRCDIR}/deps/linux_amd64/libedit.a -lutil
+#cgo LDFLAGS: -Wl,--start-group ${SRCDIR}/deps/linux_amd64/libpython.a ${SRCDIR}/deps/linux_amd64/libbz2.a -ldl ${SRCDIR}/deps/linux_amd64/libffi.a ${SRCDIR}/deps/linux_amd64/libncursesw.a ${SRCDIR}/deps/linux_amd64/libpanelw.a -lm ${SRCDIR}/deps/linux_amd64/libmpdec.a ${SRCDIR}/deps/linux_amd64/libcrypto.a ${SRCDIR}/deps/linux_amd64/liblzma.a -lpthread -lrt ${SRCDIR}/deps/linux_amd64/libsqlite3.a ${SRCDIR}/deps/linux_amd64/libssl.a ${SRCDIR}/deps/linux_amd64/libuuid.a ${SRCDIR}/deps/linux_amd64/libzstd.a ${SRCDIR}/deps/linux_amd64/libz.a ${SRCDIR}/deps/linux_amd64/libexpat.a ${SRCDIR}/deps/linux_amd64/libedit.a -lutil -Wl,--end-group
 */
 import "C"
 
