@@ -15,6 +15,7 @@ take turns under the GIL.
 **Targets:** darwin/arm64, darwin/amd64, linux/arm64, linux/amd64 (glibc).
 **CPython:** 3.14.8, from [python-build-standalone](https://github.com/astral-sh/python-build-standalone)
 release 20261003.
+**Bundled libraries:** OpenSSL 3.5.9, SQLite 3.53.1, zlib 1.3.2, zstd 1.5.7, with the rest of that release's set. Security fixes to any of them arrive by rebuilding from a newer release (see `SECURITY.md`). On macOS, zlib, ncurses and libedit are the system's.
 
 ## How it is built
 
