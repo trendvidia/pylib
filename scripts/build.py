@@ -40,6 +40,14 @@ STDLIB_SKIP = {"test", "idlelib", "tkinter", "turtledemo", "ensurepip", "site-pa
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE = os.environ.get("CACHE", os.path.expanduser("~/.cache/pylib"))
 LLVM = os.environ.get("LLVM", "/opt/homebrew/opt/llvm/bin")
+# Notices for linked code the archive's licenses/ lacks, copied next to them.
+EXTRA_LICENSES = os.path.join(ROOT, "scripts", "licenses")
+# License paths PYTHON.json names that do not match what is linked.
+STALE_LICENSES = {
+    # zlib and binascii: the archive's libz.a is zlib 1.3.2 (deflate's
+    # banner says so), under LICENSE.zlib.txt; on darwin, -lz is the system's.
+    "licenses/LICENSE.zlib-ng.txt",
+}
 
 
 def run(*args, **kw):
@@ -73,13 +81,14 @@ def build(triple):
     info = json.load(open(os.path.join(py, "PYTHON.json")))
     b = info["build_info"]
     inittab = open(os.path.join(py, "build", "Modules", "config.c")).read()
-    objs, links = list(b["core"]["objs"]) + [b["inittab_object"]], []
+    objs, links, licenses = list(b["core"]["objs"]) + [b["inittab_object"]], [], [info["license_path"]]
     for name, variants in sorted(b["extensions"].items()):
         e = variants[0]
         if e.get("in_core") or e["init_fn"] not in inittab:
             continue
         objs += e.get("objs", [])
         links += [l for l in e.get("links", []) if l not in links]
+        licenses += e.get("license_paths") or []
     links += [l for l in b["core"]["links"] if l not in links]
 
     out = os.path.join(ROOT, "deps", plat)
@@ -128,7 +137,16 @@ def build(triple):
                 with open(p, "rb") as fh:
                     t.addfile(ti, fh)
     gz.close()
-    shutil.copytree(os.path.join(py, "licenses"), os.path.join(out, "licenses"))
+    lic = os.path.join(out, "licenses")
+    shutil.copytree(os.path.join(py, "licenses"), lic)
+    # The archive's licenses leave out some of what is linked: zstd, which
+    # PYTHON.json names but the archive lacks, and the code CPython
+    # incorporates (mimalloc, HACL*, ...), which its LICENSE does not list.
+    for f in os.listdir(EXTRA_LICENSES):
+        shutil.copy(os.path.join(EXTRA_LICENSES, f), lic)
+    for p in sorted(set(licenses)):
+        if p not in STALE_LICENSES and not os.path.exists(os.path.join(out, p)):
+            sys.exit(f"{triple}: {p} is named by PYTHON.json for a linked extension and is missing")
 
     goos, goarch = plat.split("_")
     with open(os.path.join(ROOT, f"link_{plat}.go"), "w") as f:

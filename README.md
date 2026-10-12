@@ -26,8 +26,10 @@ release 20261003.
 - It strips debug info.
 - It packs the standard library, minus tests, tkinter, idlelib and ensurepip, as `deps/<platform>/stdlib.tar.gz`.
 
-To link, use the same toolchains as alidade's release: `clang -arch` for darwin, `zig cc -target <arch>-linux-gnu` for linux, with `CGO_LDFLAGS` cleared.
+To link, use the system toolchain or a cross compiler: `clang -arch <arch>` for darwin, and gcc or `zig cc -target <arch>-linux-gnu` for linux, with `CGO_LDFLAGS` cleared.
 
 ## Licenses
 
-CPython is under the PSF license. The libraries linked with it (OpenSSL, SQLite, libffi, zlib, xz, bzip2, zstd, expat, mpdecimal, ncurses, libedit, libuuid) are under their own licenses, copied into `deps/<platform>/licenses/` from python-build-standalone.
+pylib is under the MIT license (`LICENSE`).
+
+CPython is under the PSF license. The libraries linked with it (OpenSSL, SQLite, libffi, zlib, xz, bzip2, zstd, expat, mpdecimal, ncurses, libedit, libuuid) are under their own licenses. These are in `deps/<platform>/licenses/`, along with the notices for the code CPython incorporates (mimalloc, HACL*, and the rest of its `Doc/license.rst`). Most come from python-build-standalone. `scripts/build.py` adds the ones it lacks from `scripts/licenses/`.
