@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # The workflow's actions. The Go module has no dependencies to update;
+  # the bundled CPython and its libraries are updated by scripts/build.py.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
