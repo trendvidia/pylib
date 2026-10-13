@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 TrendVidia, LLC.
+
 // Package pylib runs CPython inside a Go program: the interpreter linked
 // statically through cgo, its standard library embedded and unpacked once
 // into a cache directory.
