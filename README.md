@@ -12,6 +12,16 @@ out, err := pylib.Run(`OUT = IN.upper()`, "hello") // "HELLO"
 A process has one interpreter. `Run` may be called from any goroutine; calls
 take turns under the GIL.
 
+## Install
+
+```sh
+go get github.com/trendvidia/pylib
+```
+
+- **Building needs cgo and a C toolchain:** clang (Xcode's command line tools) on macOS, and gcc or `zig cc` on Linux. Cross-compiling needs a C cross compiler for the target.
+- **The download is large:** the module is a 57 MB download (144 MB unpacked), because it carries the prebuilt libraries for all four targets. A binary links only its own target's. For scale, a program that only calls `Start` and `Run` builds to 23 MB on darwin/arm64.
+- **`Run` is not a sandbox:** the code it runs has the full rights of the Go process (see `SECURITY.md`).
+
 **Targets:** darwin/arm64, darwin/amd64, linux/arm64, linux/amd64 (glibc).
 **CPython:** 3.14.8, from [python-build-standalone](https://github.com/astral-sh/python-build-standalone)
 release 20261003.
