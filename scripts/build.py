@@ -84,11 +84,13 @@ def build(triple):
     objs, links, licenses = list(b["core"]["objs"]) + [b["inittab_object"]], [], [info["license_path"]]
     for name, variants in sorted(b["extensions"].items()):
         e = variants[0]
-        if e.get("in_core") or e["init_fn"] not in inittab:
+        if not e.get("in_core") and e["init_fn"] not in inittab:
             continue
+        licenses += e.get("license_paths") or []
+        if e.get("in_core"):
+            continue  # its objects are among the core's
         objs += e.get("objs", [])
         links += [l for l in e.get("links", []) if l not in links]
-        licenses += e.get("license_paths") or []
     links += [l for l in b["core"]["links"] if l not in links]
 
     out = os.path.join(ROOT, "deps", plat)
@@ -137,15 +139,20 @@ def build(triple):
                 with open(p, "rb") as fh:
                     t.addfile(ti, fh)
     gz.close()
+    # Only the licenses PYTHON.json names for what is linked: the archive's
+    # licenses/ also covers what is not (Tcl/Tk, X11, Berkeley DB).
     lic = os.path.join(out, "licenses")
-    shutil.copytree(os.path.join(py, "licenses"), lic)
+    os.makedirs(lic)
+    for p in sorted(set(licenses) - STALE_LICENSES):
+        if os.path.exists(os.path.join(py, p)):
+            shutil.copy(os.path.join(py, p), lic)
     # The archive's licenses leave out some of what is linked: zstd, which
     # PYTHON.json names but the archive lacks, and the code CPython
     # incorporates (mimalloc, HACL*, ...), which its LICENSE does not list.
     for f in os.listdir(EXTRA_LICENSES):
         shutil.copy(os.path.join(EXTRA_LICENSES, f), lic)
-    for p in sorted(set(licenses)):
-        if p not in STALE_LICENSES and not os.path.exists(os.path.join(out, p)):
+    for p in sorted(set(licenses) - STALE_LICENSES):
+        if not os.path.exists(os.path.join(out, p)):
             sys.exit(f"{triple}: {p} is named by PYTHON.json for a linked extension and is missing")
 
     goos, goarch = plat.split("_")
