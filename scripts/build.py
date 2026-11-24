@@ -123,8 +123,17 @@ def build(triple):
         # which need them: a group is rescanned until nothing more
         # resolves. lld and Apple's ld search every archive anyway.
         flags = ["-Wl,--start-group"] + flags + ["-Wl,--end-group"]
+    # clang -O2 runs LLVM's call-graph-profile pass over the PGO-weighted
+    # bitcode, and on Mach-O it leaves the result in __LLVM,__cg_profile.
+    # Go 1.26.11 and 1.27.4 refuse any __LLVM section in an archive that
+    # #cgo LDFLAGS names, as LTO input. Apple's ld lays out the binary the
+    # same without it. ELF keeps its copy, .llvm.call-graph-profile, which
+    # Go allows.
+    strip = ["--strip-debug"]
+    if plat.startswith("darwin_"):
+        strip.append("--remove-section=__LLVM,__cg_profile")
     for a in os.listdir(out):
-        run(f"{LLVM}/llvm-strip", "--strip-debug", os.path.join(out, a))
+        run(f"{LLVM}/llvm-strip", *strip, os.path.join(out, a))
 
     shutil.copytree(os.path.join(py, info["python_paths"]["include"]), os.path.join(out, "include"))
     stdlib = os.path.join(py, info["python_paths"]["stdlib"])
