@@ -16,11 +16,18 @@ jobs:
         # One native runner per target: the system C toolchain links each
         # (Apple's ld on macOS, GNU ld through gcc on Linux).
         os: [macos-15, macos-15-intel, ubuntu-24.04-arm, ubuntu-24.04]
+        # The oldest Go go.mod allows, and the newest release. A Go patch
+        # release can start refusing what #cgo LDFLAGS names (1.27.4 refused
+        # an LLVM section in the darwin archives), and the oldest never sees
+        # that.
+        go: [go.mod, stable]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
+          go-version-file: ${{ matrix.go == 'go.mod' && 'go.mod' || '' }}
+          go-version: ${{ matrix.go == 'stable' && 'stable' || '' }}
+      - run: go version
       - run: go vet ./...
       - run: go test -race -count=1 -v ./...
