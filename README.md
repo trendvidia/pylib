@@ -31,7 +31,7 @@ release 20261003.
 
 `scripts/build.py` regenerates `deps/` and `link_*.go`:
 - It downloads python-build-standalone's `pgo+lto-full` archive for each target.
-- Those objects are LLVM bitcode, so it compiles each one to a native object for that target. This needs an LLVM at least as new as the one that wrote them: LLVM 22 for 20261003, Homebrew's `llvm` here. Each `link_*.go` names the clang that compiled its target. A rebuild with that clang reproduces `deps/` byte for byte, and another version changes some objects' code.
+- Those objects are LLVM bitcode, so it compiles each one to a native object for that target. This needs an LLVM at least as new as the one that wrote them: LLVM 22 for 20261003, Homebrew's `llvm` here. Each `link_*.go` names the clang that compiled its target. A rebuild with that clang reproduces `deps/` byte for byte, and another version changes some objects' code. So `build.py` stops when its clang is not the one named, unless `NEW_CLANG=1` says the compiler change is meant.
 - It takes the object list from the archive's `PYTHON.json`, not from `libpython.a`, whose member names repeat.
 - It includes every extension module CPython's builtin table names (100 on Linux, 101 on macOS). The shared-library-only ones are left out: `_tkinter` and the test modules.
 - It strips debug info.
